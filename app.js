@@ -4,11 +4,10 @@
  */
 
 var express = require('express'),
-  routes = require('./routes'),
-  user = require('./routes/user'),
-  images = require('./routes/images'),
   http = require('http'),
-  path = require('path');
+  path = require('path'),
+  routes = require('./routes'),
+  images = require('./routes/images');
 
 var app = express();
 
@@ -39,6 +38,5 @@ server.listen(app.get('port'), function(){
 
 // Register route handlers
 app.get('/', routes.index);
-app.get('/users', user.list);
 app.get('/images', images.list);
 

@@ -7,7 +7,9 @@
   "dependencies": {
     "express": "3.0.x",
     "jade": "*",
-    "stylus": "*"
+    "stylus": "*",
+    "jsdom": "0.3.4",
+    "request": "2.12.0"
   },
   "engines": {
     "node": "0.8.x",
