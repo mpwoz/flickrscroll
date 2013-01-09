@@ -9,9 +9,19 @@ request = require('request'),
 url = require('url');
 
 
-var scrape_urls = function(res) {
+var scrape_urls = function(params, res) {
+
+
+  var uri = 'http://www.flickr.com/creativecommons/by-2.0';
+  uri = uri + "/tags/" + params.tags;
+  
+  // E.g. /page3
+  var suffix = "/page" + params.page;
+  uri = uri + suffix;
+
+  
   request(
-    { uri: 'http://www.flickr.com/creativecommons/by-2.0' }, // /tags/{tag} if searching by tag
+    { uri: uri }, // /tags/{tag} if searching by tag
     function(err, response, body){
       var self = this;
       self.items = [];
@@ -24,39 +34,33 @@ var scrape_urls = function(res) {
       }, 
       function(err, window){
         var $ = window.jQuery;
-        console.log($('title').text());
 
 
         var result = [];
         var pics = $('p.StreamList img').
         each(function(index) {
           var src = $(this).attr('src');
-          src = src.replace(/_t.jpg$/, '_n.jpg');
+          // for a different-size image
+          src = src.replace(/_t.jpg$/, '_q.jpg'); 
           result.push( src );
         });
-        console.log(result);
 
 
         res.json({urls: result});
-
-        
       });
   });
 };
 
 
+// Get a list of urls of images
 exports.list = function(req, res){
-  var urls = scrape_urls(res);
 
-  /*
-  res.json({ urls: urls
-    [
-    'http://farm9.staticflickr.com/8076/8363887136_ccb09d17c7_t.jpg',
-    'http://farm9.staticflickr.com/8076/8363887136_ccb09d17c7_c.jpg',
-    'http://farm9.staticflickr.com/8076/8363887136_ccb09d17c7_t.jpg',
-    'http://farm9.staticflickr.com/8076/8363887136_ccb09d17c7_t.jpg'
-    ] });
-  */
+  // Default to page 1
+  var page = req.params.page || "1";
+  var tags = req.params.tags || "California";
+
+
+  var urls = scrape_urls({page: page, tags: tags}, res);
 };
 
 

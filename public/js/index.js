@@ -14,20 +14,43 @@ function loadImage(url) {
     });
 }
 
-$.ajax({
-  url: '/images',
-  method: 'GET',
-  success: function(data) {
-    for(var i=0; i<data.urls.length; i++) {
-      loadImage(data.urls[i]);
-    }
+var request_images = function(tags, page) {
+  $.ajax({
+    url: '/images/' + tags + '/' + page,
+    method: 'GET',
+    success: function(data) {
+      for(var i=0; i<data.urls.length; i++) {
+        loadImage(data.urls[i]);
+      }
 
+      /*
+
+      */
+
+    }
+  });
+};
+
+
+
+// Document ready handler
+$(function() {
+  // Request 10 pages of images
+  for (var i=1; i<50; i++) {
+    request_images('California', i);
+  }
+
+  /*
+  // Apply intelligent layout 
+  $('#images').imagesLoaded(function() {
     $('#images').masonry({
       itemSelector: '.item',
       columnWidth: 260,
       isAnimated: true
     });
-  }
+  });
+  */
+
 });
 
 
