@@ -1,13 +1,20 @@
 
 
-function loadImage(url) {
+// Param should look like: { thumburl: <link to square image>, pageurl: <link to image page> }
+function loadImage(param) {
 
   var img = $('<img />')
-    .attr('src', url)
+    .attr('src', param.thumburl)
     .load(function() {
       img.hide();
-      var div = $('<div />').attr('class', 'item').append(img);
+
+      // A link to the original image
+      var div = $('<div />').attr('class', 'item');
+      var link = $('<a />').attr('href', 'http://www.flickr.com' + param.pageurl);
+      link.append(img);
+      div.append(link);
       $('#images').append(div);
+
       img.fadeIn({
         duration:1000
       });
@@ -23,35 +30,36 @@ var request_images = function(tags, page) {
         loadImage(data.urls[i]);
       }
 
-      /*
-
-      */
 
     }
   });
 };
 
 
+var load_image_pages = function(tag, startpage, numpages) {
+  // Defaults
+  startpage = startpage || 1;
+  numpages = numpages || 7;
+
+  for (var i=startpage; i<numpages; i++) {
+    request_images(tag, i);
+  }
+};
+
 
 // Document ready handler
 $(function() {
-  // Request 10 pages of images
-  for (var i=1; i<50; i++) {
-    request_images('California', i);
-  }
+  load_image_pages('California');
 
-  /*
-  // Apply intelligent layout 
-  $('#images').imagesLoaded(function() {
-    $('#images').masonry({
-      itemSelector: '.item',
-      columnWidth: 260,
-      isAnimated: true
-    });
+  $('#tag-form').submit( function( evt ) {
+    evt.preventDefault();
+    $('#images').html(""); // clear current images
+    tag_text = $('#tag-text').val();
+    load_image_pages(tag_text);
   });
-  */
 
 });
+
 
 
 

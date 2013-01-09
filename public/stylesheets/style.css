@@ -1,24 +1,17 @@
 body {
-  padding: 0px;
-  margin: 0px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  padding-top: 51px;
+  background-color: #191919;
 }
-a {
-  color: #00b7ff;
+body > div.container {
+  padding-top: 2px;
+  background-color: #191919;
 }
-/*
-img
-  margin: 4px
-img:hover
-  margin: 0px
-  border: 4px solid black
-*/
 .item {
   float: left;
   height: 150px;
   width: 150px;
   margin: 1px;
 }
-#images {
-  height: 1000px;
+input#tag-text {
+  margin-right: 10px;
 }

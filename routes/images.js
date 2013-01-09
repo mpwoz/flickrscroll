@@ -37,12 +37,18 @@ var scrape_urls = function(params, res) {
 
 
         var result = [];
-        var pics = $('p.StreamList img').
+        var pic_link = $('p.StreamList').
         each(function(index) {
-          var src = $(this).attr('src');
-          // for a different-size image
-          src = src.replace(/_t.jpg$/, '_q.jpg'); 
-          result.push( src );
+
+          // Extract the link to the image's page
+          var page_url = $(this).children('a').attr('href');
+
+          // Extract the raw thumbnail location
+          var src = $(this).find('img').attr('src');
+          src = src.replace(/_t.jpg$/, '_q.jpg'); // get square size
+
+
+          result.push( { thumburl: src, pageurl: page_url} );
         });
 
 
