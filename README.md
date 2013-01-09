@@ -10,7 +10,9 @@ for other projects as long as credit is given (see flickr for more details on th
 
 ### Why?
 > Because everyone needs another flickr scraper
+
 > To browse free photos for other projects
+
 > To learn nodejs, web scraping
 
 
