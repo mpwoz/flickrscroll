@@ -6,7 +6,8 @@ function loadImage(url) {
     .attr('src', url)
     .load(function() {
       img.hide();
-      $('#images').append(img);
+      var div = $('<div />').attr('class', 'item').append(img);
+      $('#images').append(div);
       img.fadeIn({
         duration:1000
       });
@@ -20,5 +21,14 @@ $.ajax({
     for(var i=0; i<data.urls.length; i++) {
       loadImage(data.urls[i]);
     }
+
+    $('#images').masonry({
+      itemSelector: '.item',
+      columnWidth: 260,
+      isAnimated: true
+    });
   }
 });
+
+
+

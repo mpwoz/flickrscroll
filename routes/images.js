@@ -30,7 +30,9 @@ var scrape_urls = function(res) {
         var result = [];
         var pics = $('p.StreamList img').
         each(function(index) {
-          result.push( $(this).attr('src') );
+          var src = $(this).attr('src');
+          src = src.replace(/_t.jpg$/, '_n.jpg');
+          result.push( src );
         });
         console.log(result);
 
