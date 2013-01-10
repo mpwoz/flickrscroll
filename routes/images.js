@@ -9,17 +9,15 @@ request = require('request'),
 url = require('url');
 
 
-var scrape_urls = function(params, res) {
-
-
-  var uri = 'http://www.flickr.com/creativecommons/by-2.0';
-  uri = uri + "/tags/" + params.tags;
+// Scrape a single page
+var scrape_page = function(uri, page, success) {
   
+  console.log("scraping page " + page);
+
   // E.g. /page3
-  var suffix = "/page" + params.page;
+  var suffix = "/page" + page;
   uri = uri + suffix;
 
-  
   request(
     { uri: uri }, // /tags/{tag} if searching by tag
     function(err, response, body){
@@ -36,25 +34,70 @@ var scrape_urls = function(params, res) {
         var $ = window.jQuery;
 
 
-        var result = [];
+        var result = "";
         var pic_link = $('p.StreamList').
         each(function(index) {
 
           // Extract the link to the image's page
-          var page_url = $(this).children('a').attr('href');
+          var page_url = 'http://www.flickr.com' + $(this).children('a').attr('href');
 
           // Extract the raw thumbnail location
           var src = $(this).find('img').attr('src');
           src = src.replace(/_t.jpg$/, '_q.jpg'); // get square size
 
+          result +=
+            '<div class="item"><a href="' +
+            page_url +
+            '"><img src="' +
+            src +
+            '"></a></div>'
+          ;
 
-          result.push( { thumburl: src, pageurl: page_url} );
+
         });
 
-
-        res.json({urls: result});
+        // Callback with all the data
+        success(result);
       });
   });
+};
+
+function aggregate_results(total, res) {
+
+  
+  var result = "";
+  var completed_count = 0;
+
+  return function(partial_result) {
+    completed_count++;
+    result += partial_result;
+
+    console.log('success! scraped ' + completed_count + ' of ' + total);
+
+    if(completed_count == total) {
+      res.send( result );
+    }
+  };
+}
+
+// Scrape a range of pages
+var scrape_pages = function(params, res) {
+
+  var page = parseInt(params.page, 10),
+      numPages = parseInt(params.numPages, 10),
+      tags = params.tags;
+
+
+  var uri = 'http://www.flickr.com/creativecommons/by-2.0';
+  uri = uri + "/tags/" + tags;
+
+  handler = aggregate_results(numPages, res);
+
+
+  for (var i=page; i<page + numPages; i++) {
+    scrape_page(uri, i, handler);
+  }
+
 };
 
 
@@ -63,10 +106,19 @@ exports.list = function(req, res){
 
   // Default to page 1
   var page = req.params.page || "1";
+  var numPages = req.params.numPages || "3";
   var tags = req.params.tags || "California";
 
+  console.log("scraping with params: ");
+  console.log("    page: " + page);
+  console.log("    num: " + numPages);
+  console.log("    tags: " + tags);
 
-  var urls = scrape_urls({page: page, tags: tags}, res);
+  scrape_pages({
+    page: page, 
+    numPages: numPages, 
+    tags: tags
+  }, res);
 };
 
 

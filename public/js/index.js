@@ -1,65 +1,93 @@
 
 
-// Param should look like: { thumburl: <link to square image>, pageurl: <link to image page> }
-function loadImage(param) {
 
-  var img = $('<img />')
-    .attr('src', param.thumburl)
-    .load(function() {
-      img.hide();
+(function indexPage() {
 
-      // A link to the original image
-      var div = $('<div />').attr('class', 'item');
-      var link = $('<a />').attr('href', 'http://www.flickr.com' + param.pageurl);
-      link.append(img);
-      div.append(link);
-      $('#images').append(div);
+  var request_images = function(tags, page, numPages, successCallback) {
+    $.ajax({
+      url: '/images/' + tags + '/' + page + '/' + numPages,
+      method: 'GET',
+      success: function(data) {
+      
+        var items = $(data).filter('div.item');
+        var imgs = items.find('img');
 
-      img.fadeIn({
-        duration:1000
-      });
-    });
-}
+        imgs.load(function() {
+          $(this).hide();
+          // A link to the original image
+          $('#images').append($(this).parent().parent());
+          $(this).fadeIn({
+            duration:1000
+          });
+        });
 
-var request_images = function(tags, page) {
-  $.ajax({
-    url: '/images/' + tags + '/' + page,
-    method: 'GET',
-    success: function(data) {
-      for(var i=0; i<data.urls.length; i++) {
-        loadImage(data.urls[i]);
+        successCallback();
+
       }
+    });
+  };
 
 
-    }
-  });
-};
 
 
-var load_image_pages = function(tag, startpage, numpages) {
-  // Defaults
-  startpage = startpage || 1;
-  numpages = numpages || 7;
+  var pageLoader = function(tag, start, step) {
 
-  for (var i=startpage; i<numpages; i++) {
-    request_images(tag, i);
-  }
-};
+    return {
+      // Load the next set of images up and append them
+      load: function(successCallback) {
+        //for (var i = start; i < start + step; i++) {
+          request_images(tag, start, step, successCallback);
+        //}
+        start += step;
+      },
+      
+
+      // Change tag and reset counter
+      reset: function(newTag) {
+        tag = newTag;
+        start = 1;
+        $('#images').html(""); // clear current images
+      }
+    };
+
+  }('Wisconsin', 1, 5);
 
 
-// Document ready handler
-$(function() {
-  load_image_pages('California');
+  var setWaypoint = function(loadItems) {
+    var $footer = $('#main-container');
 
-  $('#tag-form').submit( function( evt ) {
-    evt.preventDefault();
-    $('#images').html(""); // clear current images
-    tag_text = $('#tag-text').val();
-    load_image_pages(tag_text);
-  });
 
-});
+    return function() {
+      $footer.waypoint(function() {
+        console.log('waypoint Triggered!');
+        $footer.waypoint('destroy');
+        loadItems(setWaypoint);
+      },
+      {
+        offset: function() {
+          var windowHeight = $(window).height();
+          var ofst = 100;
+          return -$(this).height() + windowHeight + ofst;
+        }
+      });
+    };
+  }(pageLoader.load);
 
+
+
+  // Document ready handler
+  $(function() {
+    pageLoader.load(setWaypoint);
+
+    $('#tag-form').submit( function( evt ) {
+      evt.preventDefault();
+      tag_text = $('#tag-text').val();
+      pageLoader.reset(tag_text);
+      pageLoader.load(setWaypoint);
+    });
+
+  }); // document ready
+})(); // indexPage() function
 
 
 
