@@ -38,5 +38,6 @@ server.listen(app.get('port'), function(){
 
 // Register route handlers
 app.get('/', routes.index);
+app.get('/about', routes.about);
 app.get('/images/:tags/:page/:numPages', images.list);
 
